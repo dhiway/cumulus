@@ -176,7 +176,7 @@
 	<span class="kw">let</span> <span class="ident">FullDeps</span> { <span class="ident">client</span>, <span class="ident">pool</span>, <span class="ident">deny_unsafe</span> } <span class="op">=</span> <span class="ident">deps</span>;
 
 	<span class="ident">module</span>.<span class="ident">merge</span>(<span class="ident">System::new</span>(<span class="ident">client</span>.<span class="ident">clone</span>(), <span class="ident">pool</span>, <span class="ident">deny_unsafe</span>).<span class="ident">into_rpc</span>())<span class="question-mark">?</span>;
-	<span class="ident">module</span>.<span class="ident">merge</span>(<span class="ident">TransactionPayment::new</span>(<span class="ident">client</span>.<span class="ident">clone</span>()).<span class="ident">into_rpc</span>())<span class="question-mark">?</span>;
+	<span class="ident">module</span>.<span class="ident">merge</span>(<span class="ident">TransactionPayment::new</span>(<span class="ident">client</span>).<span class="ident">into_rpc</span>())<span class="question-mark">?</span>;
 
 	<span class="prelude-val">Ok</span>(<span class="ident">module</span>)
 }
@@ -216,5 +216,5 @@
 	<span class="prelude-val">Ok</span>(<span class="ident">module</span>)
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="polkadot_parachain" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="polkadot_parachain" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

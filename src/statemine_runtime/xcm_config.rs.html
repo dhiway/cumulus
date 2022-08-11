@@ -220,6 +220,31 @@
 <span id="215">215</span>
 <span id="216">216</span>
 <span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2022 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -236,7 +261,7 @@
 <span class="comment">// limitations under the License.</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::{
-	<span class="ident">AccountId</span>, <span class="ident">AssetId</span>, <span class="ident">Assets</span>, <span class="ident">Balance</span>, <span class="ident">Balances</span>, <span class="ident">Call</span>, <span class="ident">Event</span>, <span class="ident">Origin</span>, <span class="ident">ParachainInfo</span>,
+	<span class="ident">AccountId</span>, <span class="ident">AssetId</span>, <span class="ident">Assets</span>, <span class="ident">Authorship</span>, <span class="ident">Balance</span>, <span class="ident">Balances</span>, <span class="ident">Call</span>, <span class="ident">Event</span>, <span class="ident">Origin</span>, <span class="ident">ParachainInfo</span>,
 	<span class="ident">ParachainSystem</span>, <span class="ident">PolkadotXcm</span>, <span class="ident">Runtime</span>, <span class="ident">WeightToFee</span>, <span class="ident">XcmpQueue</span>,
 };
 <span class="kw">use</span> <span class="ident">frame_support</span>::{
@@ -247,9 +272,12 @@
 <span class="kw">use</span> <span class="ident">pallet_xcm::XcmPassthrough</span>;
 <span class="kw">use</span> <span class="ident">parachains_common</span>::{
 	<span class="ident">impls::ToStakingPot</span>,
-	<span class="ident">xcm_config</span>::{<span class="ident">DenyReserveTransferToRelayChain</span>, <span class="ident">DenyThenTry</span>},
+	<span class="ident">xcm_config</span>::{
+		<span class="ident">AssetFeeAsExistentialDepositMultiplier</span>, <span class="ident">DenyReserveTransferToRelayChain</span>, <span class="ident">DenyThenTry</span>,
+	},
 };
 <span class="kw">use</span> <span class="ident">polkadot_parachain::primitives::Sibling</span>;
+<span class="kw">use</span> <span class="ident">sp_runtime::traits::ConvertInto</span>;
 <span class="kw">use</span> <span class="ident">xcm::latest::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">xcm_builder</span>::{
 	<span class="ident">AccountId32Aliases</span>, <span class="ident">AllowKnownQueryResponses</span>, <span class="ident">AllowSubscriptionsFrom</span>,
@@ -351,6 +379,7 @@
 	<span class="comment">// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.</span>
 	<span class="kw">pub</span> <span class="ident">UnitWeightCost</span>: <span class="ident">Weight</span> <span class="op">=</span> <span class="number">1_000_000_000</span>;
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxInstructions</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">100</span>;
+	<span class="kw">pub</span> <span class="ident">XcmAssetFeesReceiver</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Authorship::author</span>();
 }
 
 <span class="macro">match_types!</span> {
@@ -392,8 +421,29 @@
 	<span class="kw">type</span> <span class="ident">LocationInverter</span> <span class="op">=</span> <span class="ident">LocationInverter</span><span class="op">&lt;</span><span class="ident">Ancestry</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">Barrier</span> <span class="op">=</span> <span class="ident">Barrier</span>;
 	<span class="kw">type</span> <span class="ident">Weigher</span> <span class="op">=</span> <span class="ident">FixedWeightBounds</span><span class="op">&lt;</span><span class="ident">UnitWeightCost</span>, <span class="ident">Call</span>, <span class="ident">MaxInstructions</span><span class="op">&gt;</span>;
-	<span class="kw">type</span> <span class="ident">Trader</span> <span class="op">=</span>
-		<span class="ident">UsingComponents</span><span class="op">&lt;</span><span class="ident">WeightToFee</span>, <span class="ident">KsmLocation</span>, <span class="ident">AccountId</span>, <span class="ident">Balances</span>, <span class="ident">ToStakingPot</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">Trader</span> <span class="op">=</span> (
+		<span class="ident">UsingComponents</span><span class="op">&lt;</span><span class="ident">WeightToFee</span>, <span class="ident">KsmLocation</span>, <span class="ident">AccountId</span>, <span class="ident">Balances</span>, <span class="ident">ToStakingPot</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">cumulus_primitives_utility::TakeFirstAssetTrader</span><span class="op">&lt;</span>
+			<span class="ident">AccountId</span>,
+			<span class="ident">AssetFeeAsExistentialDepositMultiplier</span><span class="op">&lt;</span>
+				<span class="ident">Runtime</span>,
+				<span class="ident">WeightToFee</span>,
+				<span class="ident">pallet_assets::BalanceToAssetBalance</span><span class="op">&lt;</span><span class="ident">Balances</span>, <span class="ident">Runtime</span>, <span class="ident">ConvertInto</span><span class="op">&gt;</span>,
+			<span class="op">&gt;</span>,
+			<span class="ident">ConvertedConcreteAssetId</span><span class="op">&lt;</span>
+				<span class="ident">AssetId</span>,
+				<span class="ident">Balance</span>,
+				<span class="ident">AsPrefixedGeneralIndex</span><span class="op">&lt;</span><span class="ident">AssetsPalletLocation</span>, <span class="ident">AssetId</span>, <span class="ident">JustTry</span><span class="op">&gt;</span>,
+				<span class="ident">JustTry</span>,
+			<span class="op">&gt;</span>,
+			<span class="ident">Assets</span>,
+			<span class="ident">cumulus_primitives_utility::XcmFeesTo32ByteAccount</span><span class="op">&lt;</span>
+				<span class="ident">FungiblesTransactor</span>,
+				<span class="ident">AccountId</span>,
+				<span class="ident">XcmAssetFeesReceiver</span>,
+			<span class="op">&gt;</span>,
+		<span class="op">&gt;</span>,
+	);
 	<span class="kw">type</span> <span class="ident">ResponseHandler</span> <span class="op">=</span> <span class="ident">PolkadotXcm</span>;
 	<span class="kw">type</span> <span class="ident">AssetTrap</span> <span class="op">=</span> <span class="ident">PolkadotXcm</span>;
 	<span class="kw">type</span> <span class="ident">AssetClaims</span> <span class="op">=</span> <span class="ident">PolkadotXcm</span>;
@@ -438,5 +488,5 @@
 	<span class="kw">type</span> <span class="ident">XcmExecutor</span> <span class="op">=</span> <span class="ident">XcmExecutor</span><span class="op">&lt;</span><span class="ident">XcmConfig</span><span class="op">&gt;</span>;
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="statemine_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="statemine_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

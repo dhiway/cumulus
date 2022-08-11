@@ -167,6 +167,8 @@
 <span id="162">162</span>
 <span id="163">163</span>
 <span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
@@ -212,6 +214,7 @@
 	<span class="kw">pub</span> <span class="ident">hrmp_egress_channel_index</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ParaId</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">hrmp_channels</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">relay_chain::v2::HrmpChannelId</span>, <span class="ident">AbridgedHrmpChannel</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">current_slot</span>: <span class="ident">relay_chain::v2::Slot</span>,
+	<span class="kw">pub</span> <span class="ident">current_epoch</span>: <span class="ident">u64</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">RelayStateSproofBuilder</span> {
@@ -236,6 +239,7 @@
 			<span class="ident">hrmp_egress_channel_index</span>: <span class="prelude-val">None</span>,
 			<span class="ident">hrmp_channels</span>: <span class="ident">BTreeMap::new</span>(),
 			<span class="ident">current_slot</span>: <span class="number">0</span>.<span class="ident">into</span>(),
+			<span class="ident">current_epoch</span>: <span class="number">0u64</span>,
 		}
 	}
 }
@@ -322,7 +326,7 @@
 			<span class="kw">for</span> (<span class="ident">channel</span>, <span class="ident">metadata</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">hrmp_channels</span> {
 				<span class="ident">insert</span>(<span class="ident">relay_chain::well_known_keys::hrmp_channels</span>(<span class="ident">channel</span>), <span class="ident">metadata</span>.<span class="ident">encode</span>());
 			}
-
+			<span class="ident">insert</span>(<span class="ident">relay_chain::well_known_keys::EPOCH_INDEX</span>.<span class="ident">to_vec</span>(), <span class="self">self</span>.<span class="ident">current_epoch</span>.<span class="ident">encode</span>());
 			<span class="ident">insert</span>(<span class="ident">relay_chain::well_known_keys::CURRENT_SLOT</span>.<span class="ident">to_vec</span>(), <span class="self">self</span>.<span class="ident">current_slot</span>.<span class="ident">encode</span>());
 		}
 
@@ -332,5 +336,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_test_relay_sproof_builder" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_test_relay_sproof_builder" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

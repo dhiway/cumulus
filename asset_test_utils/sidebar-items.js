@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ExtBuilder",""],["RuntimeHelper",""]],"type":[["AccountIdOf",""],["BalanceOf",""],["SessionKeysOf",""],["ValidatorIdOf",""]]});

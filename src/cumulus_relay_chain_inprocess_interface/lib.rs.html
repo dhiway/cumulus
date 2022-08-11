@@ -521,19 +521,6 @@
 <span id="516">516</span>
 <span id="517">517</span>
 <span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
@@ -563,10 +550,9 @@
 };
 <span class="kw">use</span> <span class="ident">cumulus_relay_chain_interface</span>::{<span class="ident">RelayChainError</span>, <span class="ident">RelayChainInterface</span>, <span class="ident">RelayChainResult</span>};
 <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">FutureExt</span>, <span class="ident">Stream</span>, <span class="ident">StreamExt</span>};
-<span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
 <span class="kw">use</span> <span class="ident">polkadot_client</span>::{<span class="ident">ClientHandle</span>, <span class="ident">ExecuteWithClient</span>, <span class="ident">FullBackend</span>};
 <span class="kw">use</span> <span class="ident">polkadot_service</span>::{
-	<span class="ident">AuxStore</span>, <span class="ident">BabeApi</span>, <span class="ident">CollatorPair</span>, <span class="ident">Configuration</span>, <span class="ident">Handle</span>, <span class="ident">NewFull</span>, <span class="ident">Role</span>, <span class="ident">TaskManager</span>,
+	<span class="ident">AuxStore</span>, <span class="ident">BabeApi</span>, <span class="ident">CollatorPair</span>, <span class="ident">Configuration</span>, <span class="ident">Handle</span>, <span class="ident">NewFull</span>, <span class="ident">TaskManager</span>,
 };
 <span class="kw">use</span> <span class="ident">sc_cli::SubstrateCli</span>;
 <span class="kw">use</span> <span class="ident">sc_client_api</span>::{
@@ -586,7 +572,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RelayChainInProcessInterface</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span> {
 	<span class="ident">full_client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
 	<span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">FullBackend</span><span class="op">&gt;</span>,
-	<span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 	<span class="ident">overseer_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
 }
 
@@ -595,7 +581,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">full_client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
 		<span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">FullBackend</span><span class="op">&gt;</span>,
-		<span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 		<span class="ident">overseer_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
 	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">full_client</span>, <span class="ident">backend</span>, <span class="ident">sync_oracle</span>, <span class="ident">overseer_handle</span> }
@@ -705,8 +691,7 @@
 	}
 
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RelayChainResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">network</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sync_oracle</span>.<span class="ident">lock</span>();
-		<span class="prelude-val">Ok</span>(<span class="ident">network</span>.<span class="ident">is_major_syncing</span>())
+		<span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">sync_oracle</span>.<span class="ident">is_major_syncing</span>())
 	}
 
 	<span class="kw">fn</span> <span class="ident">overseer_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RelayChainResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span><span class="op">&gt;</span> {
@@ -825,7 +810,7 @@
 <span class="kw">struct</span> <span class="ident">RelayChainInProcessInterfaceBuilder</span> {
 	<span class="ident">polkadot_client</span>: <span class="ident">polkadot_client::Client</span>,
 	<span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">FullBackend</span><span class="op">&gt;</span>,
-	<span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 	<span class="ident">overseer_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
 }
 
@@ -866,32 +851,29 @@
 	<span class="ident">telemetry_worker_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TelemetryWorkerHandle</span><span class="op">&gt;</span>,
 	<span class="ident">hwbench</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sc_sysinfo::HwBench</span><span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">NewFull</span><span class="op">&lt;</span><span class="ident">polkadot_client::Client</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CollatorPair</span><span class="op">&gt;</span>), <span class="ident">polkadot_service::Error</span><span class="op">&gt;</span> {
-	<span class="kw">let</span> <span class="ident">is_light</span> <span class="op">=</span> <span class="macro">matches!</span>(<span class="ident">config</span>.<span class="ident">role</span>, <span class="ident">Role::Light</span>);
-	<span class="kw">if</span> <span class="ident">is_light</span> {
-		<span class="prelude-val">Err</span>(<span class="ident">polkadot_service::Error::Sub</span>(<span class="string">&quot;Light client not supported.&quot;</span>.<span class="ident">into</span>()))
+	<span class="kw">let</span> (<span class="ident">is_collator</span>, <span class="ident">maybe_collator_key</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">parachain_config</span>.<span class="ident">role</span>.<span class="ident">is_authority</span>() {
+		<span class="kw">let</span> <span class="ident">collator_key</span> <span class="op">=</span> <span class="ident">CollatorPair::generate</span>().<span class="number">0</span>;
+		(<span class="ident">polkadot_service::IsCollator::Yes</span>(<span class="ident">collator_key</span>.<span class="ident">clone</span>()), <span class="prelude-val">Some</span>(<span class="ident">collator_key</span>))
 	} <span class="kw">else</span> {
-		<span class="kw">let</span> (<span class="ident">is_collator</span>, <span class="ident">maybe_collator_key</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">parachain_config</span>.<span class="ident">role</span>.<span class="ident">is_authority</span>() {
-			<span class="kw">let</span> <span class="ident">collator_key</span> <span class="op">=</span> <span class="ident">CollatorPair::generate</span>().<span class="number">0</span>;
-			(<span class="ident">polkadot_service::IsCollator::Yes</span>(<span class="ident">collator_key</span>.<span class="ident">clone</span>()), <span class="prelude-val">Some</span>(<span class="ident">collator_key</span>))
-		} <span class="kw">else</span> {
-			(<span class="ident">polkadot_service::IsCollator::No</span>, <span class="prelude-val">None</span>)
-		};
+		(<span class="ident">polkadot_service::IsCollator::No</span>, <span class="prelude-val">None</span>)
+	};
 
-		<span class="kw">let</span> <span class="ident">relay_chain_full_node</span> <span class="op">=</span> <span class="ident">polkadot_service::build_full</span>(
-			<span class="ident">config</span>,
-			<span class="ident">is_collator</span>,
-			<span class="prelude-val">None</span>,
-			<span class="bool-val">true</span>,
-			<span class="prelude-val">None</span>,
-			<span class="ident">telemetry_worker_handle</span>,
-			<span class="bool-val">true</span>,
-			<span class="ident">polkadot_service::RealOverseerGen</span>,
-			<span class="prelude-val">None</span>,
-			<span class="ident">hwbench</span>,
-		)<span class="question-mark">?</span>;
+	<span class="kw">let</span> <span class="ident">relay_chain_full_node</span> <span class="op">=</span> <span class="ident">polkadot_service::build_full</span>(
+		<span class="ident">config</span>,
+		<span class="ident">is_collator</span>,
+		<span class="prelude-val">None</span>,
+		<span class="comment">// Disable BEEFY. It should not be required by the internal relay chain node.</span>
+		<span class="bool-val">false</span>,
+		<span class="prelude-val">None</span>,
+		<span class="ident">telemetry_worker_handle</span>,
+		<span class="bool-val">true</span>,
+		<span class="ident">polkadot_service::RealOverseerGen</span>,
+		<span class="prelude-val">None</span>,
+		<span class="prelude-val">None</span>,
+		<span class="ident">hwbench</span>,
+	)<span class="question-mark">?</span>;
 
-		<span class="prelude-val">Ok</span>((<span class="ident">relay_chain_full_node</span>, <span class="ident">maybe_collator_key</span>))
-	}
+	<span class="prelude-val">Ok</span>((<span class="ident">relay_chain_full_node</span>, <span class="ident">maybe_collator_key</span>))
 }
 
 <span class="doccomment">/// Builds a relay chain interface by constructing a full relay chain node</span>
@@ -914,8 +896,7 @@
 		<span class="ident">hwbench</span>,
 	)<span class="question-mark">?</span>;
 
-	<span class="kw">let</span> <span class="ident">sync_oracle</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">full_node</span>.<span class="ident">network</span>.<span class="ident">clone</span>());
-	<span class="kw">let</span> <span class="ident">sync_oracle</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">sync_oracle</span>));
+	<span class="kw">let</span> <span class="ident">sync_oracle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">full_node</span>.<span class="ident">network</span>.<span class="ident">clone</span>());
 	<span class="kw">let</span> <span class="ident">relay_chain_interface_builder</span> <span class="op">=</span> <span class="ident">RelayChainInProcessInterfaceBuilder</span> {
 		<span class="ident">polkadot_client</span>: <span class="ident">full_node</span>.<span class="ident">client</span>.<span class="ident">clone</span>(),
 		<span class="ident">backend</span>: <span class="ident">full_node</span>.<span class="ident">backend</span>.<span class="ident">clone</span>(),
@@ -930,8 +911,6 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-	<span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
-
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
 	<span class="kw">use</span> <span class="ident">polkadot_primitives::v2::Block</span> <span class="kw">as</span> <span class="ident">PBlock</span>;
@@ -940,20 +919,20 @@
 		<span class="ident">DefaultTestClientBuilderExt</span>, <span class="ident">ExecutionStrategy</span>, <span class="ident">InitPolkadotBlockBuilder</span>,
 		<span class="ident">TestClientBuilder</span>, <span class="ident">TestClientBuilderExt</span>,
 	};
-	<span class="kw">use</span> <span class="ident">sc_service::Arc</span>;
 	<span class="kw">use</span> <span class="ident">sp_consensus</span>::{<span class="ident">BlockOrigin</span>, <span class="ident">SyncOracle</span>};
 	<span class="kw">use</span> <span class="ident">sp_runtime::traits::Block</span> <span class="kw">as</span> <span class="ident">BlockT</span>;
+	<span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
 	<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">executor::block_on</span>, <span class="ident">poll</span>, <span class="ident">task::Poll</span>};
 
 	<span class="kw">struct</span> <span class="ident">DummyNetwork</span> {}
 
 	<span class="kw">impl</span> <span class="ident">SyncOracle</span> <span class="kw">for</span> <span class="ident">DummyNetwork</span> {
-		<span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 			<span class="macro">unimplemented!</span>(<span class="string">&quot;Not needed for test&quot;</span>)
 		}
 
-		<span class="kw">fn</span> <span class="ident">is_offline</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">is_offline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 			<span class="macro">unimplemented!</span>(<span class="string">&quot;Not needed for test&quot;</span>)
 		}
 	}
@@ -967,17 +946,12 @@
 
 		<span class="kw">let</span> <span class="ident">block_builder</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">init_polkadot_block_builder</span>();
 		<span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">block_builder</span>.<span class="ident">build</span>().<span class="ident">expect</span>(<span class="string">&quot;Finalizes the block&quot;</span>).<span class="ident">block</span>;
-		<span class="kw">let</span> <span class="ident">dummy_network</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">DummyNetwork</span> {});
+		<span class="kw">let</span> <span class="ident">dummy_network</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">DummyNetwork</span> {});
 
 		(
 			<span class="ident">client</span>.<span class="ident">clone</span>(),
 			<span class="ident">block</span>,
-			<span class="ident">RelayChainInProcessInterface::new</span>(
-				<span class="ident">client</span>,
-				<span class="ident">backend</span>.<span class="ident">clone</span>(),
-				<span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">dummy_network</span>)),
-				<span class="prelude-val">None</span>,
-			),
+			<span class="ident">RelayChainInProcessInterface::new</span>(<span class="ident">client</span>, <span class="ident">backend</span>.<span class="ident">clone</span>(), <span class="ident">dummy_network</span>, <span class="prelude-val">None</span>),
 		)
 	}
 
@@ -1066,5 +1040,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_relay_chain_inprocess_interface" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_relay_chain_inprocess_interface" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

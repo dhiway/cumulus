@@ -485,6 +485,7 @@
 <span id="480">480</span>
 <span id="481">481</span>
 <span id="482">482</span>
+<span id="483">483</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
@@ -731,6 +732,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">pallet_transaction_payment::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
+	<span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
 	<span class="kw">type</span> <span class="ident">OnChargeTransaction</span> <span class="op">=</span> <span class="ident">pallet_transaction_payment::CurrencyAdapter</span><span class="op">&lt;</span><span class="ident">Balances</span>, ()<span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">WeightToFee</span> <span class="op">=</span> <span class="ident">IdentityFee</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">LengthToFee</span> <span class="op">=</span> <span class="ident">ConstantMultiplier</span><span class="op">&lt;</span><span class="ident">Balance</span>, <span class="ident">TransactionByteFee</span><span class="op">&gt;</span>;
@@ -833,7 +835,7 @@
 
 <span class="kw">impl</span> <span class="ident">OnRuntimeUpgrade</span> <span class="kw">for</span> <span class="ident">TestOnRuntimeUpgrade</span> {
 	<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
-		<span class="macro">assert_eq!</span>(<span class="ident">sp_io::storage::get</span>(<span class="ident">TEST_RUNTIME_UPGRADE_KEY</span>), <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]));
+		<span class="macro">assert_eq!</span>(<span class="ident">sp_io::storage::get</span>(<span class="ident">TEST_RUNTIME_UPGRADE_KEY</span>), <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>].<span class="ident">into</span>()));
 
 		<span class="number">1</span>
 	}
@@ -957,7 +959,7 @@
 					<span class="ident">sp_std::time::Duration::from_secs</span>(<span class="number">6</span>),
 				).<span class="ident">create_inherent_data</span>().<span class="ident">expect</span>(<span class="string">&quot;Could not create the timestamp inherent data&quot;</span>);
 
-			<span class="ident">inherent_data</span>.<span class="ident">check_extrinsics</span>(<span class="kw-2">&amp;</span><span class="ident">block</span>)
+			<span class="ident">inherent_data</span>.<span class="ident">check_extrinsics</span>(<span class="ident">block</span>)
 		}
 	}
 }
@@ -968,5 +970,5 @@
 	<span class="ident">CheckInherents</span> <span class="op">=</span> <span class="ident">CheckInherents</span>,
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_test_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_test_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

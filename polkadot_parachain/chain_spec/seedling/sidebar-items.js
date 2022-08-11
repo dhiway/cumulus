@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["get_seedling_chain_spec",""],["seedling_testnet_genesis",""]],"type":[["SeedlingChainSpec","Specialized `ChainSpec` for the seedling parachain runtime."]]});

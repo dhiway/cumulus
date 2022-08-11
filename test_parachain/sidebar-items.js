@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["extract_genesis_wasm",""],["main",""],["wrap_announce_block",""]],"mod":[["cli",""]]});
+initSidebarItems({"fn":[["main",""],["wrap_announce_block",""]],"mod":[["cli",""]]});

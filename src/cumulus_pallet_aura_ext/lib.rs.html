@@ -162,7 +162,6 @@
 <span id="157">157</span>
 <span id="158">158</span>
 <span id="159">159</span>
-<span id="160">160</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
@@ -214,21 +213,19 @@
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
 	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
-	<span class="kw">use</span> <span class="ident">sp_std::vec::Vec</span>;
 
 	<span class="doccomment">/// The configuration trait.</span>
 	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
 	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">pallet_aura::Config</span> <span class="op">+</span> <span class="ident">frame_system::Config</span> {}
 
 	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
-	<span class="attribute">#[<span class="ident">pallet::without_storage_info</span>]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">_</span>);
 
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">fn</span> <span class="ident">on_finalize</span>(<span class="kw">_</span>: <span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
 			<span class="comment">// Update to the latest AuRa authorities.</span>
-			<span class="ident">Authorities</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">Aura</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::authorities</span>().<span class="ident">into_inner</span>());
+			<span class="ident">Authorities</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">Aura</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::authorities</span>());
 		}
 
 		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="kw">_</span>: <span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Weight</span> {
@@ -239,16 +236,17 @@
 		}
 	}
 
-	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
-	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
-
 	<span class="doccomment">/// Serves as cache for the authorities.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The authorities in AuRa are overwritten in `on_initialize` when we switch to a new session,</span>
 	<span class="doccomment">/// but we require the old authorities to verify the seal when validating a PoV. This will always</span>
 	<span class="doccomment">/// be updated to the latest AuRa authorities in `on_finalize`.</span>
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">Authorities</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AuthorityId</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">Authorities</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span>
+		<span class="kw">_</span>,
+		<span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">T::AuthorityId</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">pallet_aura::Config</span><span class="op">&gt;</span><span class="ident">::MaxAuthorities</span><span class="op">&gt;</span>,
+		<span class="ident">ValueQuery</span>,
+	<span class="op">&gt;</span>;
 
 	<span class="attribute">#[<span class="ident">pallet::genesis_config</span>]</span>
 	<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
@@ -264,7 +262,7 @@
 				<span class="string">&quot;AuRa authorities empty, maybe wrong order in `construct_runtime!`?&quot;</span>,
 			);
 
-			<span class="ident">Authorities</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">authorities</span>.<span class="ident">into_inner</span>());
+			<span class="ident">Authorities</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">authorities</span>);
 		}
 	}
 }
@@ -324,5 +322,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_pallet_aura_ext" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_pallet_aura_ext" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

@@ -493,6 +493,9 @@
 <span id="488">488</span>
 <span id="489">489</span>
 <span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
@@ -854,6 +857,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">async_trait::async_trait</span>;
 	<span class="kw">use</span> <span class="ident">cumulus_client_consensus_common::ParachainCandidate</span>;
 	<span class="kw">use</span> <span class="ident">cumulus_test_client</span>::{
 		<span class="ident">Client</span>, <span class="ident">ClientBlockImportExt</span>, <span class="ident">DefaultTestClientBuilderExt</span>, <span class="ident">InitBlockBuilder</span>,
@@ -869,8 +873,10 @@
 	<span class="kw">use</span> <span class="ident">sp_state_machine::Backend</span>;
 
 	<span class="kw">struct</span> <span class="ident">AlwaysSupportsParachains</span>;
+
+	<span class="attribute">#[<span class="ident">async_trait</span>]</span>
 	<span class="kw">impl</span> <span class="ident">HeadSupportsParachains</span> <span class="kw">for</span> <span class="ident">AlwaysSupportsParachains</span> {
-		<span class="kw">fn</span> <span class="ident">head_supports_parachains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_head</span>: <span class="kw-2">&amp;</span><span class="ident">PHash</span>) -&gt; <span class="ident">bool</span> {
+		<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">head_supports_parachains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_head</span>: <span class="kw-2">&amp;</span><span class="ident">PHash</span>) -&gt; <span class="ident">bool</span> {
 			<span class="bool-val">true</span>
 		}
 	}
@@ -984,5 +990,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_client_collator" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cumulus_client_collator" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

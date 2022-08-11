@@ -527,6 +527,11 @@
 <span id="522">522</span>
 <span id="523">523</span>
 <span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -618,7 +623,7 @@
 			<span class="ident">ValidatorRegistration</span>,
 		},
 		<span class="ident">weights::DispatchClass</span>,
-		<span class="ident">PalletId</span>,
+		<span class="ident">BoundedVec</span>, <span class="ident">PalletId</span>,
 	};
 	<span class="kw">use</span> <span class="ident">frame_system</span>::{<span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>, <span class="ident">Config</span> <span class="kw">as</span> <span class="ident">SystemConfig</span>};
 	<span class="kw">use</span> <span class="ident">pallet_session::SessionManager</span>;
@@ -652,8 +657,7 @@
 		<span class="doccomment">/// Account Identifier from which the internal Pot is generated.</span>
 		<span class="kw">type</span> <span class="ident">PotId</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">PalletId</span><span class="op">&gt;</span>;
 
-		<span class="doccomment">/// Maximum number of candidates that we should have. This is used for benchmarking and is not</span>
-		<span class="doccomment">/// enforced.</span>
+		<span class="doccomment">/// Maximum number of candidates that we should have. This is enforced in code.</span>
 		<span class="doccomment">///</span>
 		<span class="doccomment">/// This does not take into account the invulnerables.</span>
 		<span class="kw">type</span> <span class="ident">MaxCandidates</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
@@ -663,9 +667,7 @@
 		<span class="doccomment">/// This does not take into account the invulnerables.</span>
 		<span class="kw">type</span> <span class="ident">MinCandidates</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
 
-		<span class="doccomment">/// Maximum number of invulnerables.</span>
-		<span class="doccomment">///</span>
-		<span class="doccomment">/// Used only for benchmarking.</span>
+		<span class="doccomment">/// Maximum number of invulnerables. This is enforced in code.</span>
 		<span class="kw">type</span> <span class="ident">MaxInvulnerables</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
 
 		<span class="comment">// Will be kicked if block is not produced in threshold.</span>
@@ -687,7 +689,9 @@
 	}
 
 	<span class="doccomment">/// Basic information about a collation candidate.</span>
-	<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
+	<span class="attribute">#[<span class="ident">derive</span>(
+		<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">scale_info::TypeInfo</span>, <span class="ident">MaxEncodedLen</span>,
+	)]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CandidateInfo</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">Balance</span><span class="op">&gt;</span> {
 		<span class="doccomment">/// Account identifier.</span>
 		<span class="kw">pub</span> <span class="ident">who</span>: <span class="ident">AccountId</span>,
@@ -697,19 +701,22 @@
 
 	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
-	<span class="attribute">#[<span class="ident">pallet::without_storage_info</span>]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">_</span>);
 
 	<span class="doccomment">/// The invulnerable, fixed collators.</span>
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">invulnerables</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
+		<span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">T::MaxInvulnerables</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// The (community, limited) collation candidates.</span>
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">candidates</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Candidates</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
-		<span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateInfo</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Candidates</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span>
+		<span class="kw">_</span>,
+		<span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">CandidateInfo</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">T::MaxCandidates</span><span class="op">&gt;</span>,
+		<span class="ident">ValueQuery</span>,
+	<span class="op">&gt;</span>;
 
 	<span class="doccomment">/// Last block authored by collator.</span>
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
@@ -759,10 +766,9 @@
 				<span class="string">&quot;duplicate invulnerables in genesis.&quot;</span>
 			);
 
-			<span class="macro">assert!</span>(
-				<span class="ident">T::MaxInvulnerables::get</span>() <span class="op">&gt;</span><span class="op">=</span> (<span class="self">self</span>.<span class="ident">invulnerables</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>),
-				<span class="string">&quot;genesis invulnerables are more than T::MaxInvulnerables&quot;</span>,
-			);
+			<span class="kw">let</span> <span class="ident">bounded_invulnerables</span> <span class="op">=</span>
+				<span class="ident">BoundedVec</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T::MaxInvulnerables</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="self">self</span>.<span class="ident">invulnerables</span>.<span class="ident">clone</span>())
+					.<span class="ident">expect</span>(<span class="string">&quot;genesis invulnerables are more than T::MaxInvulnerables&quot;</span>);
 			<span class="macro">assert!</span>(
 				<span class="ident">T::MaxCandidates::get</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">desired_candidates</span>,
 				<span class="string">&quot;genesis desired_candidates are more than T::MaxCandidates&quot;</span>,
@@ -770,7 +776,7 @@
 
 			<span class="op">&lt;</span><span class="ident">DesiredCandidates</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">desired_candidates</span>);
 			<span class="op">&lt;</span><span class="ident">CandidacyBond</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">candidacy_bond</span>);
-			<span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">invulnerables</span>);
+			<span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">bounded_invulnerables</span>);
 		}
 	}
 
@@ -799,6 +805,8 @@
 		<span class="ident">AlreadyCandidate</span>,
 		<span class="doccomment">/// User is not a candidate</span>
 		<span class="ident">NotCandidate</span>,
+		<span class="doccomment">/// Too many invulnerables</span>
+		<span class="ident">TooManyInvulnerables</span>,
 		<span class="doccomment">/// User is already an Invulnerable</span>
 		<span class="ident">AlreadyInvulnerable</span>,
 		<span class="doccomment">/// Account has no associated validator ID</span>
@@ -819,15 +827,11 @@
 			<span class="ident">new</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>,
 		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">T::UpdateOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
-			<span class="comment">// we trust origin calls, this is just a for more accurate benchmarking</span>
-			<span class="kw">if</span> (<span class="ident">new</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&gt;</span> <span class="ident">T::MaxInvulnerables::get</span>() {
-				<span class="macro">log::warn!</span>(
-					<span class="string">&quot;invulnerables &gt; T::MaxInvulnerables; you might need to run benchmarks again&quot;</span>
-				);
-			}
+			<span class="kw">let</span> <span class="ident">bounded_invulnerables</span> <span class="op">=</span> <span class="ident">BoundedVec</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T::MaxInvulnerables</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="ident">new</span>)
+				.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyInvulnerables</span>)<span class="question-mark">?</span>;
 
 			<span class="comment">// check if the invulnerables have associated validator keys before they are set</span>
-			<span class="kw">for</span> <span class="ident">account_id</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">new</span> {
+			<span class="kw">for</span> <span class="ident">account_id</span> <span class="kw">in</span> <span class="ident">bounded_invulnerables</span>.<span class="ident">iter</span>() {
 				<span class="kw">let</span> <span class="ident">validator_key</span> <span class="op">=</span> <span class="ident">T::ValidatorIdOf::convert</span>(<span class="ident">account_id</span>.<span class="ident">clone</span>())
 					.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NoAssociatedValidatorId</span>)<span class="question-mark">?</span>;
 				<span class="macro">ensure!</span>(
@@ -836,8 +840,10 @@
 				);
 			}
 
-			<span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="kw-2">&amp;</span><span class="ident">new</span>);
-			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::NewInvulnerables</span> { <span class="ident">invulnerables</span>: <span class="ident">new</span> });
+			<span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="kw-2">&amp;</span><span class="ident">bounded_invulnerables</span>);
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::NewInvulnerables</span> {
+				<span class="ident">invulnerables</span>: <span class="ident">bounded_invulnerables</span>.<span class="ident">to_vec</span>(),
+			});
 			<span class="prelude-val">Ok</span>(().<span class="ident">into</span>())
 		}
 
@@ -901,7 +907,7 @@
 						<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AlreadyCandidate</span>)<span class="question-mark">?</span>
 					} <span class="kw">else</span> {
 						<span class="ident">T::Currency::reserve</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="ident">deposit</span>)<span class="question-mark">?</span>;
-						<span class="ident">candidates</span>.<span class="ident">push</span>(<span class="ident">incoming</span>);
+						<span class="ident">candidates</span>.<span class="ident">try_push</span>(<span class="ident">incoming</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyCandidates</span>)<span class="question-mark">?</span>;
 						<span class="op">&lt;</span><span class="ident">LastAuthoredBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(
 							<span class="ident">who</span>.<span class="ident">clone</span>(),
 							<span class="ident">frame_system::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::block_number</span>() <span class="op">+</span> <span class="ident">T::KickThreshold::get</span>(),
@@ -959,8 +965,10 @@
 		<span class="doccomment">/// Assemble the current set of candidates and invulnerables into the next collator set.</span>
 		<span class="doccomment">///</span>
 		<span class="doccomment">/// This is done on the fly, as frequent as we are told to do so, as the session manager.</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assemble_collators</span>(<span class="ident">candidates</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> {
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">collators</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::invulnerables</span>();
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assemble_collators</span>(
+			<span class="ident">candidates</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">T::MaxCandidates</span><span class="op">&gt;</span>,
+		) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> {
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">collators</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::invulnerables</span>().<span class="ident">to_vec</span>();
 			<span class="ident">collators</span>.<span class="ident">extend</span>(<span class="ident">candidates</span>);
 			<span class="ident">collators</span>
 		}
@@ -968,8 +976,8 @@
 		<span class="doccomment">/// Kicks out candidates that did not produce a block in the kick threshold</span>
 		<span class="doccomment">/// and refund their deposits.</span>
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">kick_stale_candidates</span>(
-			<span class="ident">candidates</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateInfo</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> {
+			<span class="ident">candidates</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">CandidateInfo</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">T::MaxCandidates</span><span class="op">&gt;</span>,
+		) -&gt; <span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">T::MaxCandidates</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">frame_system::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 			<span class="kw">let</span> <span class="ident">kick_threshold</span> <span class="op">=</span> <span class="ident">T::KickThreshold::get</span>();
 			<span class="ident">candidates</span>
@@ -990,7 +998,9 @@
 						<span class="prelude-val">None</span>
 					}
 				})
-				.<span class="ident">collect</span>()
+				.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+				.<span class="ident">try_into</span>()
+				.<span class="ident">expect</span>(<span class="string">&quot;filter_map operation can&#39;t result in a bounded vec larger than its original; qed&quot;</span>)
 		}
 	}
 
@@ -1052,5 +1062,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_collator_selection" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_collator_selection" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>

@@ -716,6 +716,7 @@
 <span id="711">711</span>
 <span id="712">712</span>
 <span id="713">713</span>
+<span id="714">714</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 <span class="comment">// `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.</span>
 <span class="attribute">#![<span class="ident">recursion_limit</span> <span class="op">=</span> <span class="string">&quot;256&quot;</span>]</span>
@@ -1072,6 +1073,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">pallet_transaction_payment::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
+	<span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
 	<span class="kw">type</span> <span class="ident">OnChargeTransaction</span> <span class="op">=</span> <span class="ident">pallet_transaction_payment::CurrencyAdapter</span><span class="op">&lt;</span><span class="ident">Balances</span>, ()<span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">WeightToFee</span> <span class="op">=</span> <span class="ident">WeightToFee</span>;
 	<span class="kw">type</span> <span class="ident">LengthToFee</span> <span class="op">=</span> <span class="ident">ConstantMultiplier</span><span class="op">&lt;</span><span class="ident">Balance</span>, <span class="ident">TransactionByteFee</span><span class="op">&gt;</span>;
@@ -1193,7 +1195,7 @@
 
 		<span class="comment">// Monetary stuff.</span>
 		<span class="ident">Balances</span>: <span class="ident">pallet_balances</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Storage</span>, <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>} <span class="op">=</span> <span class="number">10</span>,
-		<span class="ident">TransactionPayment</span>: <span class="ident">pallet_transaction_payment</span>::{<span class="ident">Pallet</span>, <span class="ident">Storage</span>} <span class="op">=</span> <span class="number">11</span>,
+		<span class="ident">TransactionPayment</span>: <span class="ident">pallet_transaction_payment</span>::{<span class="ident">Pallet</span>, <span class="ident">Storage</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>} <span class="op">=</span> <span class="number">11</span>,
 
 		<span class="comment">// Collator support. The order of these 4 are important and shall not change.</span>
 		<span class="ident">Authorship</span>: <span class="ident">pallet_authorship</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Storage</span>} <span class="op">=</span> <span class="number">20</span>,
@@ -1430,5 +1432,5 @@
 	<span class="ident">CheckInherents</span> <span class="op">=</span> <span class="ident">CheckInherents</span>,
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="parachain_template_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="parachain_template_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
 </body></html>
