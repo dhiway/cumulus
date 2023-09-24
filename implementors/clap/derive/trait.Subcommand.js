@@ -1,5 +1,0 @@
-(function() {var implementors = {};
-implementors["parachain_template_node"] = [{"text":"impl Subcommand for <a class=\"enum\" href=\"parachain_template_node/cli/enum.Subcommand.html\" title=\"enum parachain_template_node::cli::Subcommand\">Subcommand</a>","synthetic":false,"types":["parachain_template_node::cli::Subcommand"]}];
-implementors["polkadot_parachain"] = [{"text":"impl Subcommand for <a class=\"enum\" href=\"polkadot_parachain/cli/enum.Subcommand.html\" title=\"enum polkadot_parachain::cli::Subcommand\">Subcommand</a>","synthetic":false,"types":["polkadot_parachain::cli::Subcommand"]}];
-implementors["test_parachain"] = [{"text":"impl Subcommand for <a class=\"enum\" href=\"test_parachain/cli/enum.Subcommand.html\" title=\"enum test_parachain::cli::Subcommand\">Subcommand</a>","synthetic":false,"types":["test_parachain::cli::Subcommand"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
